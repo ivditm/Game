@@ -6,6 +6,8 @@ package play;
 import java.io.Serializable;
 import java.util.Objects;
 
+import interactions.Interactable;
+
 /**
  * Classe abstraite représentant un objet générique dans le jeu.
  * <p>
@@ -15,7 +17,7 @@ import java.util.Objects;
  * {@code Serializable} pour permettre la sauvegarde de l'état du jeu.
  * </p>
  */
-public abstract class Objet implements Serializable {
+public abstract class Objet implements Serializable, Interactable {
 
 	/**
 	 * 
@@ -23,12 +25,12 @@ public abstract class Objet implements Serializable {
 	private static final long serialVersionUID = -4428485099355404540L;
 
 	/** Le nom usuel de l'objet. */
-	private String nom;
+	private final String nom;
 
 	/** Une description détaillée de l'objet pour donner du contexte au joueur. */
-	private String description;
+	private final String description;
 
-	private TypeObjet type;
+	private final TypeObjet type;
 
 	/**
 	 * Construit un nouvel objet avec un nom et une description spécifiques.

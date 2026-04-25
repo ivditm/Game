@@ -1,5 +1,10 @@
 package jeu;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import play.Ingredient;
+
 /**
  * La classe {@code Jeu} représente la logique principale du jeu.
  * <p>
@@ -33,6 +38,8 @@ public class Jeu {
 	/** Zone precedente ds laquelle s'est trouvé le jouer */
 	private Zone zonePrecedente;
 
+	private List<Zone> toutesLesZones;
+
 	/**
 	 * Construit un nouveau jeu.
 	 * <p>
@@ -59,26 +66,124 @@ public class Jeu {
 	 * Crée et initialise les zones du jeu et leurs sorties.
 	 */
 	private void creerCarte() {
-		// Création de 5 zones
-		Zone[] zones = new Zone[5];
-		zones[0] = new Zone("le couloir", "", "Couloir.jpg");
-		zones[1] = new Zone("l'escalier", "", "Escalier.jpg");
-		zones[2] = new Zone("la grande salle", "", "GrandeSalle.jpg");
-		zones[3] = new Zone("la salle à manger", "", "SalleAManger.jpg");
-		zones[4] = new Zone("la salle de potions", "", "SalleDePotions.jpg");
+		// ==========================================
+		// CRÉATION DES ZONES (18 zones au total)
+		// ==========================================
 
-		// Définition des sorties des zones
-		zones[0].ajouteSortie(Direction.EST, zones[1]);
-		zones[1].ajouteSortie(Direction.OUEST, zones[0]);
-		zones[1].ajouteSortie(Direction.EST, zones[2]);
-		zones[2].ajouteSortie(Direction.OUEST, zones[1]);
-		zones[2].ajouteSortie(Direction.NORD, zones[4]);
-		zones[4].ajouteSortie(Direction.SUD, zones[2]);
-		zones[3].ajouteSortie(Direction.SUD, zones[0]);
-		zones[0].ajouteSortie(Direction.NORD, zones[3]);
+		// Bâtiment A (6 zones)
+		Zone salleInterdite = new Zone("Salle Interdite", "Une pièce sombre et lugubre. L'expérience a mal tourné ici.",
+				"1_SALLE_INTERDITE.jpg");
+		Zone couloirA = new Zone("Couloir Central (A)", "Un couloir sombre...", "Couloir_A.jpg");
+		Zone laboPrincipal = new Zone("Laboratoire Principal", "Des paillasses renversées.", "Labo_Principal.jpg");
+		Zone salleInfoA = new Zone("Salle Informatique (A)", "L'ordinateur contient la recette.",
+				"2_SALLE_INFORMATIQUE.jpg");
+		Zone stockageChimique = new Zone("Stockage Chimique", "Une odeur âcre flotte dans l'air.",
+				"3_STOCKAGE_CHIMIQUE.jpg");
+		Zone infirmerie = new Zone("Infirmerie", "Des lits médicaux en désordre.", "4_INFIRMERIE.jpg");
 
+		// Bâtiment B (7 zones)
+		Zone cafeteria = new Zone("Cafétéria", "Des tables renversées.", "Cafeteria.jpg");
+		Zone cuisine = new Zone("Cuisine", "Les frigos sont ouverts et vides.", "Cuisine.jpg");
+		Zone couloirB = new Zone("Couloir (B)", "Un long couloir vitré.", "Couloir_B.jpg");
+		Zone buPrincipale = new Zone("Bibliothèque Universitaire", "Des rangées de livres poussiéreux.",
+				"BU_Principale.jpg");
+		Zone salleInfoB = new Zone("Salle Informatique (BU)", "Des PC alignés.", "Salle_Info_BU.jpg");
+		Zone salleEtude = new Zone("Salle d'Étude", "Un silence pesant.", "Salle_Etude.jpg");
+		Zone toilettesBU = new Zone("Toilettes (BU)", "Des lavabos brisés.", "Toilettes_BU.jpg");
+
+		// Bâtiment C (5 zones)
+		Zone cafeteriaProfs = new Zone("Cafétéria des Professeurs", "Un espace de détente saccagé.",
+				"Cafeteria_Profs.jpg");
+		Zone salleReunion = new Zone("Salle de Réunion", "Une grande table ovale.", "Salle_Reunion.jpg");
+		Zone toilettesC1 = new Zone("Toilettes (Cafét Profs)", "Des cabines fermées.", "Toilettes_C1.jpg");
+		Zone toilettesC2 = new Zone("Toilettes (Salle Réunion)", "L'eau coule encore.", "Toilettes_C2.jpg");
+
+		// ==========================================
+		// CONNEXIONS DES ZONES
+		// ==========================================
+
+		// Bâtiment A
+		salleInterdite.ajouteSortie(Direction.SUD, couloirA);
+		couloirA.ajouteSortie(Direction.NORD, salleInterdite);
+		couloirA.ajouteSortie(Direction.SUD, laboPrincipal);
+		couloirA.ajouteSortie(Direction.NORD_EST, salleInfoA);
+		couloirA.ajouteSortie(Direction.NORD_OUEST, stockageChimique);
+		couloirA.ajouteSortie(Direction.OUEST, infirmerie);
+
+		// Connexion inter-bâtiments (A vers B) [cite: 401]
+		// Normalement verrouillé, mais on définit la connexion géographique
+		couloirA.ajouteSortie(Direction.EST, cafeteria);
+		cafeteria.ajouteSortie(Direction.OUEST, couloirA); // Retour (si permis)
+
+		// Bâtiment B [cite: 412, 418, 421-424]
+		cafeteria.ajouteSortie(Direction.OUEST, cuisine);
+		// (Ajoute ici les autres connexions du Bâtiment B selon ton UML/Plan)
+		buPrincipale.ajouteSortie(Direction.NORD, salleInfoB);
+		buPrincipale.ajouteSortie(Direction.EST, salleEtude);
+		buPrincipale.ajouteSortie(Direction.NORD_OUEST, toilettesBU);
+
+		// Connexion inter-bâtiments (A vers C, via le Sud)
+		couloirA.ajouteSortie(Direction.SUD, cafeteriaProfs); // ou couloirC
+
+		// Bâtiment C
+		cafeteriaProfs.ajouteSortie(Direction.OUEST, toilettesC1);
+		cafeteriaProfs.ajouteSortie(Direction.NORD, salleReunion);
+		salleReunion.ajouteSortie(Direction.EST, toilettesC2);
+
+		// ==========================================
+		// CRÉATION ET PLACEMENT DES INGRÉDIENTS
+		// ==========================================
+
+		// Ingrédient 1
+		Ingredient ing1 = new Ingredient("Poudre stabilisatrice", "Base chimique.", 1);
+		stockageChimique.ajouterInteractable(ing1);
+
+		// Ingrédient 2
+		Ingredient ing2 = new Ingredient("Adrénaline pure", "Stimulant puissant.", 2);
+		infirmerie.ajouterInteractable(ing2);
+
+		// Ingrédient 3
+		Ingredient ing3 = new Ingredient("Bicarbonate de soude", "Agent neutralisant.", 3);
+		cuisine.ajouterInteractable(ing3);
+
+		// Ingrédient 4
+		Ingredient ing4 = new Ingredient("Échantillon fongique caché", "Souche biologique.", 4);
+		toilettesBU.ajouterInteractable(ing4);
+
+		// Ingrédient 5
+		Ingredient ing5 = new Ingredient("Solvant expérimental", "Catalyseur final.", 5);
+		salleReunion.ajouterInteractable(ing5);
+
+		// ==========================================
+		// INITIALISATION DU DÉPART
+		// ==========================================
+
+		toutesLesZones = new ArrayList<>(18);
+
+		// Bâtiment A
+		toutesLesZones.add(salleInterdite);
+		toutesLesZones.add(couloirA);
+		toutesLesZones.add(laboPrincipal);
+		toutesLesZones.add(salleInfoA);
+		toutesLesZones.add(stockageChimique);
+		toutesLesZones.add(infirmerie);
+
+		// Bâtiment B
+		toutesLesZones.add(cafeteria);
+		toutesLesZones.add(cuisine);
+		toutesLesZones.add(couloirB);
+		toutesLesZones.add(buPrincipale);
+		toutesLesZones.add(salleInfoB);
+		toutesLesZones.add(salleEtude);
+		toutesLesZones.add(toilettesBU);
+
+		// Bâtiment C
+		toutesLesZones.add(cafeteriaProfs);
+		toutesLesZones.add(salleReunion);
+		toutesLesZones.add(toilettesC1);
+		toutesLesZones.add(toilettesC2);
 		// Zone de départ du joueur
-		zonePrecedente = zoneCourante = zones[0];
+		zonePrecedente = zoneCourante = salleInterdite;
 	}
 
 	/**
