@@ -122,7 +122,9 @@ public class Jeu {
 	 */
 	public void setGUI(GUI g) {
 		gui = g;
-		if (!estUneReprise) jouerIntroduction();
+		if (!estUneReprise) {
+			jouerIntroduction();
+		}
 		afficherMessageDeBienvenue();
 	}
 
@@ -495,6 +497,20 @@ public class Jeu {
 			gui.afficher("Pas de sortie " + direction);
 			gui.afficher();
 		} else {
+			if (zoneCourante.getNom().equals("Sortie (Bat A)") && nouvelle.getNom().equals("Rue")) {
+				if (joueur.getInventaire().getProchainRangAttendu() <= 2) {
+					gui.afficher("Accès refusé ! Les portes de sécurité du Bâtiment A sont scellées.");
+					gui.afficher("Vous devez d'abord récupérer les 2 ingrédients de ce bâtiment.");
+					return;
+				}
+			}
+			if (zoneCourante.getNom().equals("Couloir (B)") && nouvelle.getNom().equals("Rue")) {
+				if (joueur.getInventaire().getProchainRangAttendu() <= 4) {
+					gui.afficher("Accès refusé ! Le Bâtiment B est en quarantaine.");
+					gui.afficher("Vous devez trouver tous les ingrédients du Bâtiment B avant de pouvoir le quitter.");
+					return;
+				}
+			}
 			zonePrecedente = zoneCourante;
 			zoneCourante = nouvelle;
 			joueur.setZoneCourante(zoneCourante);
@@ -503,6 +519,7 @@ public class Jeu {
 				gui.afficher("!!! LE MONSTRE VOUS A TROUVÉ !!!");
 				String imageAvecMonstre = zoneCourante.nomImage().replace(".png", "_monstre.png");
 				gui.afficheImage(imageAvecMonstre);
+
 				javax.swing.Timer timer = new javax.swing.Timer(300, e -> {
 					javax.swing.JOptionPane.showMessageDialog(null, "Le monstre vous a attaqué ! Fuyez !",
 							"DANGER DE MORT", javax.swing.JOptionPane.WARNING_MESSAGE);
@@ -845,14 +862,9 @@ public class Jeu {
 	/** Sauvegarde l'état courant de la partie sur disque. */
 	private void sauvegarder() {
 		verifieGUI();
-		boolean recetteObtenue = joueur.getInventaire().getObjets().stream()
-				.anyMatch(o -> o instanceof Recette);
-		EtatPartie etat = new EtatPartie(
-				zoneCourante.getNom(),
-				joueur.getInventaire().getProchainRangAttendu(),
-				recetteObtenue,
-				gestionRencontres.getNbRencontres(),
-				chronometre.getTempsRestantMs());
+		boolean recetteObtenue = joueur.getInventaire().getObjets().stream().anyMatch(o -> o instanceof Recette);
+		EtatPartie etat = new EtatPartie(zoneCourante.getNom(), joueur.getInventaire().getProchainRangAttendu(),
+				recetteObtenue, gestionRencontres.getNbRencontres(), chronometre.getTempsRestantMs());
 		if (saveManager.sauvegarderPartie(compteJoueur.getPseudo(), etat)) {
 			gui.afficher("Partie sauvegardée.");
 		} else {
@@ -861,14 +873,12 @@ public class Jeu {
 	}
 
 	/**
-	 * Restaure l'état d'une partie sauvegardée dans le jeu en cours.
-	 * Appelé uniquement depuis le constructeur {@link #Jeu(Joueur, EtatPartie)}.
+	 * Restaure l'état d'une partie sauvegardée dans le jeu en cours. Appelé
+	 * uniquement depuis le constructeur {@link #Jeu(Joueur, EtatPartie)}.
 	 */
 	private void restaurerEtat(EtatPartie etat) {
 		// Trouver la zone par son nom
-		Zone zoneRestauree = toutesLesZones.stream()
-				.filter(z -> z.getNom().equals(etat.nomZone))
-				.findFirst()
+		Zone zoneRestauree = toutesLesZones.stream().filter(z -> z.getNom().equals(etat.nomZone)).findFirst()
 				.orElse(toutesLesZones.get(0));
 		zoneCourante = zonePrecedente = zoneRestauree;
 		joueur.setZoneCourante(zoneRestauree);
@@ -890,10 +900,15 @@ public class Jeu {
 		chronometre.restaurer(etat.tempsRestantMs);
 	}
 
-	/** Met à jour les stats du compte et supprime la sauvegarde en fin de partie. */
+	/**
+	 * Met à jour les stats du compte et supprime la sauvegarde en fin de partie.
+	 */
 	private void enregistrerFin(boolean victoire) {
-		if (victoire) compteJoueur.ajouterVictoire();
-		else compteJoueur.ajouterDefaite();
+		if (victoire) {
+			compteJoueur.ajouterVictoire();
+		} else {
+			compteJoueur.ajouterDefaite();
+		}
 		compteManager.sauvegarderCompte(compteJoueur);
 		saveManager.supprimerSauvegarde(compteJoueur.getPseudo());
 	}
