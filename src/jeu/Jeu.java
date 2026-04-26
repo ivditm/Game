@@ -428,8 +428,6 @@ public class Jeu {
 		case "S", "SUD" -> allerEn(Direction.SUD);
 		case "E", "EST" -> allerEn(Direction.EST);
 		case "O", "OUEST" -> allerEn(Direction.OUEST);
-
-		// ДОБАВЛЕНЫ ДИАГОНАЛЬНЫЕ НАПРАВЛЕНИЯ
 		case "NE", "NORD_EST" -> allerEn(Direction.NORD_EST);
 		case "NO", "NORD_OUEST" -> allerEn(Direction.NORD_OUEST);
 		case "SE", "SUD_EST" -> allerEn(Direction.SUD_EST);
@@ -697,7 +695,7 @@ public class Jeu {
 
 		Interactable objet = objets.get(0);
 
-		if (objet instanceof interactions.Ordinateur ordi) {
+		if (objet instanceof Ordinateur ordi) {
 			if (!ordi.estOuvert() && ordi.getEnigme() != null && !ordi.getEnigme().estResolue()) {
 				String reponse = javax.swing.JOptionPane.showInputDialog(null,
 						ordi.getEnigme().examiner() + "\nVotre mot de passe (A, B, C ou D) :",

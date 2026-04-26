@@ -57,7 +57,6 @@ public class Zone implements Serializable {
 		this.nom = nom;
 		this.description = description;
 		this.nomImage = image;
-
 		this.sorties = new EnumMap<>(Direction.class);
 		this.obstacles = new EnumMap<>(Direction.class);
 		this.interactables = new ArrayList<>();
