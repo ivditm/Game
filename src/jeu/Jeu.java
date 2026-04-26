@@ -83,6 +83,7 @@ public class Jeu {
 	 */
 	public void setGUI(GUI g) {
 		gui = g;
+		jouerIntroduction();
 		afficherMessageDeBienvenue();
 	}
 
@@ -91,40 +92,49 @@ public class Jeu {
 	 */
 	private void creerCarte() {
 		// ==========================================
-		// CRÉATION DES ZONES (18 zones au total)
+		// CRÉATION DES ZONES
 		// ==========================================
 
-		// TODO : поставить правильные пути проверить правильность описаний
-		// Bâtiment A (6 zones)
-		Zone salleInterdite = new Zone("Salle Interdite", "Une pièce sombre et lugubre. L'expérience a mal tourné ici.",
-				"salleinterdite.png");
-		Zone couloirA = new Zone("Couloir Central (A)", "Un couloir sombre...", "couloirprincipal.png");
-		Zone laboPrincipal = new Zone("Laboratoire Principal", "Des paillasses renversées.", "laboprincipal.png");
-		Zone salleInfoA = new Zone("Salle Informatique (A)", "L'ordinateur contient la recette.", "salleinfo.png");
-		Zone stockageChimique = new Zone("Stockage Chimique", "Une odeur âcre flotte dans l'air.",
-				"stockagechimique.png");
-		Zone infirmerie = new Zone("Infirmerie", "Des lits médicaux en désordre.", "infirmerie.png");
+		// outside
 
-		// Bâtiment B (7 zones)
-		Zone cafeteria = new Zone("Cafétéria", "Des tables renversées.", "cafetaria.png");
-		Zone cuisine = new Zone("Cuisine", "Les frigos sont ouverts et vides.", "cuisine.png");
-		Zone couloirB = new Zone("Couloir (B)", "Un long couloir vitré.", "couloirbu.png");
+		Zone outside = new Zone("Rue", "L'espace entre les batiments", "dehors.png");
+
+		// Bâtiment A
+		Zone salleInterdite = new Zone("Salle Interdite (Bat A)",
+				"Une pièce sombre et lugubre. L'expérience a mal tourné ici.", "salleinterdite_batiment_a.png");
+		Zone couloirA = new Zone("Couloir Central (Bat A)", "Un couloir sombre...", "couloiiruni_batiment_a.png");
+		// TODO add picture
+		Zone laboPrincipal = new Zone("Laboratoire Principal (Bat A)", "Des paillasses renversées.", "labo_a.png");
+		Zone salleInfoA = new Zone("Salle Informatique (Bat A)", "L'ordinateur contient la recette.",
+				"salleinfo_batiment_a.png");
+		Zone stockageChimique = new Zone("Stockage Chimique (Bat A)", "Une odeur âcre flotte dans l'air.",
+				"stockagechimique_batiment_a.png");
+		Zone infirmerie = new Zone("Infirmerie (Bat A)", "Des lits médicaux en désordre.", "infirmerie_batiment_a.png");
+		Zone sortieBatA = new Zone("Sortie (Bat A)", "Sortie de batiment A", "sortiesalle_batiment_a.png");
+
+		// Bâtiment B
+		Zone cafeteria = new Zone("Cafétéria (Bat B)", "Des tables renversées.", "cafetaria_batiment_b.png");
+		Zone cuisine = new Zone("Cuisine", "Les frigos sont ouverts et vides.", "cuisine_batiment_b.png");
+		Zone couloirB = new Zone("Couloir (B)", "Un long couloir vitré.", "couloirbu_batiment_c.png");
 		Zone buPrincipale = new Zone("Bibliothèque Universitaire", "Des rangées de livres poussiéreux.",
-				"bibliotheque.png");
-		Zone salleInfoB = new Zone("Salle Informatique (BU)", "Des PC alignés.", "salleinfobatimentB.png");
-		Zone salleEtude = new Zone("Salle d'Étude", "Un silence pesant.", "salledetude.png");
-		Zone toilettesBU = new Zone("Toilettes (BU)", "Des lavabos brisés.", "toilettes.png");
+				"universite.png");
+		Zone salleInfoB = new Zone("Salle Informatique (BU)", "Des PC alignés.", "salleinfo_batiment_b.png");
+		Zone salleEtude = new Zone("Salle d'Étude", "Un silence pesant.", "salledetude_batiment_b.png");
+		Zone toilettesBU = new Zone("Toilettes (BU)", "Des lavabos brisés.", "toilettes_batiment_b.png");
 
-		// Bâtiment C (5 zones)
+		// Bâtiment C
+		Zone couloirC = new Zone("Couloir Principal (C)", "Une entrée majestueuse.", "couloirprincipal_batiment_c.png");
 		Zone cafeteriaProfs = new Zone("Cafétéria des Professeurs", "Un espace de détente saccagé.",
-				"cafetprofesseurs.png");
-		Zone salleReunion = new Zone("Salle de Réunion", "Une grande table ovale.", "salledereunion.png");
-		Zone toilettesC1 = new Zone("Toilettes (Cafét Profs)", "Des cabines fermées.", "toilettes.png");
-		Zone toilettesC2 = new Zone("Toilettes (Salle Réunion)", "L'eau coule encore.", "toilettes.png");
+				"cafetprofesseurs_batiment_c.png");
+		Zone salleReunion = new Zone("Salle de Réunion", "Une grande table ovale.", "salledereunion_batiment_c.png");
+		Zone toilettesC1 = new Zone("Toilettes (Cafét Profs)", "Des cabines fermées.", "toilettes_batiment_c.png");
+		Zone toilettesC2 = new Zone("Toilettes (Salle Réunion)", "L'eau coule encore.", "toilettes_batiment_c.png");
+
 		// ==========================================
-		// CONNEXIONS DES ZONES
+		// CONNEXIONS DES ZONES (SELON LA DOCUMENTATION)
 		// ==========================================
 
+		// Bâtiment A
 		salleInterdite.ajouteSortie(Direction.SUD, couloirA);
 		couloirA.ajouteSortie(Direction.NORD, salleInterdite);
 
@@ -134,26 +144,34 @@ public class Jeu {
 		couloirA.ajouteSortie(Direction.NORD_EST, salleInfoA);
 		salleInfoA.ajouteSortie(Direction.SUD_OUEST, couloirA);
 
-		// ВОЗВРАЩАЕМ ПОТЕРЯННЫЕ КОМНАТЫ В БАШНЕ А:
 		couloirA.ajouteSortie(Direction.NORD_OUEST, stockageChimique);
 		stockageChimique.ajouteSortie(Direction.SUD_EST, couloirA);
 
 		couloirA.ajouteSortie(Direction.OUEST, infirmerie);
 		infirmerie.ajouteSortie(Direction.EST, couloirA);
 
-		// Connexion inter-bâtiments (A vers B)
-		couloirA.ajouteSortie(Direction.EST, couloirB);
-		couloirB.ajouteSortie(Direction.OUEST, couloirA);
+		couloirA.ajouteSortie(Direction.SUD_EST, sortieBatA);
+		sortieBatA.ajouteSortie(Direction.NORD_OUEST, couloirA);
+
+		// Connexions inter-bâtiments
+		sortieBatA.ajouteSortie(Direction.EST, outside);
+		outside.ajouteSortie(Direction.OUEST, sortieBatA);
+
+		outside.ajouteSortie(Direction.EST, couloirB);
+		couloirB.ajouteSortie(Direction.OUEST, outside);
+
+		outside.ajouteSortie(Direction.SUD, couloirC);
+		couloirC.ajouteSortie(Direction.NORD, outside);
 
 		// Bâtiment B
-		couloirB.ajouteSortie(Direction.NORD, cafeteria);
-		cafeteria.ajouteSortie(Direction.SUD, couloirB);
-
 		cafeteria.ajouteSortie(Direction.OUEST, cuisine);
 		cuisine.ajouteSortie(Direction.EST, cafeteria);
 
-		couloirB.ajouteSortie(Direction.SUD, buPrincipale);
-		buPrincipale.ajouteSortie(Direction.NORD_EST, couloirB);
+		cafeteria.ajouteSortie(Direction.NORD_OUEST, couloirB);
+		couloirB.ajouteSortie(Direction.SUD_EST, cafeteria);
+
+		couloirB.ajouteSortie(Direction.NORD_EST, buPrincipale);
+		buPrincipale.ajouteSortie(Direction.SUD_OUEST, couloirB);
 
 		buPrincipale.ajouteSortie(Direction.NORD, salleInfoB);
 		salleInfoB.ajouteSortie(Direction.SUD, buPrincipale);
@@ -161,19 +179,16 @@ public class Jeu {
 		buPrincipale.ajouteSortie(Direction.EST, salleEtude);
 		salleEtude.ajouteSortie(Direction.OUEST, buPrincipale);
 
-		// ВОЗВРАЩАЕМ ПОТЕРЯННЫЕ ТУАЛЕТЫ BU:
 		buPrincipale.ajouteSortie(Direction.NORD_OUEST, toilettesBU);
 		toilettesBU.ajouteSortie(Direction.SUD_EST, buPrincipale);
 
-		// Connexion inter-bâtiments (A vers C)
-		couloirA.ajouteSortie(Direction.SUD_EST, cafeteriaProfs);
-		cafeteriaProfs.ajouteSortie(Direction.NORD_OUEST, couloirA);
-
 		// Bâtiment C
-		cafeteriaProfs.ajouteSortie(Direction.OUEST, toilettesC1);
-		toilettesC1.ajouteSortie(Direction.EST, cafeteriaProfs);
+		couloirC.ajouteSortie(Direction.EST, cafeteriaProfs);
+		cafeteriaProfs.ajouteSortie(Direction.OUEST, couloirC);
 
-		// ВОЗВРАЩАЕМ ВХОД В ПЕРЕГОВОРНУЮ:
+		cafeteriaProfs.ajouteSortie(Direction.SUD_OUEST, toilettesC1);
+		toilettesC1.ajouteSortie(Direction.NORD_EST, cafeteriaProfs);
+
 		cafeteriaProfs.ajouteSortie(Direction.NORD, salleReunion);
 		salleReunion.ajouteSortie(Direction.SUD, cafeteriaProfs);
 
@@ -182,16 +197,10 @@ public class Jeu {
 
 		List<Enigme> poolEnigmes = genererToutesLesEnigmes();
 		Collections.shuffle(poolEnigmes);
-
-		// 3. On place les 4 premières énigmes du paquet mélangé sur nos portes
-		// stratégiques
-		couloirA.ajouteObstacle(Direction.NORD_OUEST, poolEnigmes.remove(0)); // Bloque le Stockage Chimique (Ingrédient
-																				// 1)
-		couloirA.ajouteObstacle(Direction.OUEST, poolEnigmes.remove(0)); // Bloque l'Infirmerie (Ingrédient 2)
-		buPrincipale.ajouteObstacle(Direction.NORD_OUEST, poolEnigmes.remove(0)); // Bloque les Toilettes BU (Ingrédient
-																					// 4)
-		cafeteriaProfs.ajouteObstacle(Direction.NORD, poolEnigmes.remove(0)); // Bloque la Salle de Réunion (Ingrédient
-																				// 5)
+		couloirA.ajouteObstacle(Direction.NORD_OUEST, poolEnigmes.remove(0));
+		couloirA.ajouteObstacle(Direction.OUEST, poolEnigmes.remove(0));
+		buPrincipale.ajouteObstacle(Direction.NORD_OUEST, poolEnigmes.remove(0));
+		cafeteriaProfs.ajouteObstacle(Direction.NORD, poolEnigmes.remove(0));
 
 		// ==========================================
 		// CRÉATION ET PLACEMENT DES INGRÉDIENTS
@@ -241,6 +250,8 @@ public class Jeu {
 
 		toutesLesZones = new ArrayList<>(18);
 
+		toutesLesZones.add(outside);
+
 		// Bâtiment A
 		toutesLesZones.add(salleInterdite);
 		toutesLesZones.add(couloirA);
@@ -248,6 +259,7 @@ public class Jeu {
 		toutesLesZones.add(salleInfoA);
 		toutesLesZones.add(stockageChimique);
 		toutesLesZones.add(infirmerie);
+		toutesLesZones.add(sortieBatA);
 
 		// Bâtiment B
 		toutesLesZones.add(cafeteria);
@@ -436,17 +448,18 @@ public class Jeu {
 			gestionRencontres.deplacerMonstre(toutesLesZones);
 			if (gestionRencontres.verifierRencontre(joueur)) {
 				gui.afficher("!!! LE MONSTRE VOUS A TROUVÉ !!!");
-				String imageAvecMonstre = zoneCourante.nomImage().replace(".jpg", "_Monstre.jpg");
+				String imageAvecMonstre = zoneCourante.nomImage().replace(".png", "_monstre.png");
 				gui.afficheImage(imageAvecMonstre);
-				javax.swing.JOptionPane.showMessageDialog(null, "Le monstre vous a attaqué ! Fuyez !", "DANGER DE MORT",
-						javax.swing.JOptionPane.WARNING_MESSAGE);
+				javax.swing.Timer timer = new javax.swing.Timer(300, e -> {
+					javax.swing.JOptionPane.showMessageDialog(null, "Le monstre vous a attaqué ! Fuyez !",
+							"DANGER DE MORT", javax.swing.JOptionPane.WARNING_MESSAGE);
+					revenir();
+				});
+				timer.setRepeats(false);
+				timer.start();
 
-				this.revenir();
 				return;
 			}
-			gui.afficher(zoneCourante.descriptionLongue());
-			gui.afficher();
-			actualiserImagePiece();
 		}
 	}
 
@@ -637,7 +650,23 @@ public class Jeu {
 	 */
 	private void afficherInventaire() {
 		verifieGUI();
-		gui.afficher(joueur.getInventaire().toString());
+		String contenu = joueur.getInventaire().toString();
+		// gui.afficher("Contenu de l'inventaire :");
+		gui.afficher(contenu);
+		if (contenu.contains("Protocole Antidote")) {
+			gui.afficher("");
+			gui.afficher("--- LECTURE DU PROTOCOLE ANTIDOTE ---");
+			gui.afficher("Ordre de synthèse requis :");
+			gui.afficher("1. Poudre stabilisatrice (Batiment A)");
+			gui.afficher("2. Adrénaline pure (Batiment A)");
+			gui.afficher("3. Bicarbonate de soude (Batiment B)");
+			gui.afficher("4. Échantillon fongique (Batiment B)");
+			gui.afficher("5. Solvant expérimental (Batiment C)");
+			gui.afficher("ATTENTION : Toute erreur de tri sera fatale.");
+			gui.afficher("-------------------------------------");
+		}
+
+		gui.afficher("");
 		gui.afficher("Temps restant : " + chronometre.getTempsRestantFormate());
 		gui.afficher();
 	}
@@ -678,11 +707,42 @@ public class Jeu {
 	private void actualiserImagePiece() {
 		String imageAafficher = zoneCourante.nomImage();
 		if (!zoneCourante.getInteractables().isEmpty()) {
-			interactions.Interactable obj = zoneCourante.getInteractables().get(0);
-			if (obj instanceof interactions.Coffre coffre && coffre.estOuvert()) {
-				imageAafficher = imageAafficher.replace(".png", "_open.png");
+			Interactable obj = zoneCourante.getInteractables().get(0);
+			if (obj instanceof Coffre coffre && coffre.estOuvert()) {
+				if (zoneCourante.getNom().contains("Salle Informatique")) {
+					imageAafficher = "salleinfo_batiment_a_protocole.png";
+				} else {
+					imageAafficher = imageAafficher.replace(".png", "_open.png");
+				}
 			}
 		}
 		gui.afficheImage(imageAafficher);
+	}
+
+	/**
+	 * Joue la cinématique d'introduction avec des images et des boîtes de dialogue.
+	 */
+	private void jouerIntroduction() {
+		String[] images = { "decouvertesalleint.png", "devcasierjournal.png", "journal.png", "journalouvert.png",
+				"experiencejournal.png", "travail.png", "amiboitpotion.png", "transformationami.png",
+				"transformationcomplete.png" };
+
+		String[] textes = {
+				"Le jeu se passe dans une fac, bâtiment scientifique, tard le soir. En passant dans un couloir, vous remarquez une salle avec un panneau : « Accès interdit. Personnel autorisé uniquement ».\nNormalement, vous passez votre chemin. Sauf que la porte est entrouverte. À l’intérieur, le laboratoire ne ressemble pas aux autres.",
+				"Clairement, vous n’avez rien à faire là. Mais vous êtes fatigués, curieux. Dans une armoire, vous trouvez des documents administratifs anciens et un coffret fermé.",
+				"Dedans, un journal de recherche, caché volontairement. Là, l’ambiance change.",
+				"Ce journal n’est pas là par hasard. Il décrit un protocole expérimental bien trop avancé pour votre niveau. Des pages manquent volontairement.",
+				"Vous comprenez deux choses :\n- L'expérience a été faite sur un humain.\n- Elle a été arrêtée après un incident grave.\n\nUne note attire l’attention : « En cas d’échec, la seule solution reste la synthèse de l’antidote. Procédure non validée. »",
+				"Vous ne prenez pas tout ça complètement au sérieux… mais vous êtes crevés, vous avez un rendu à faire, et vous pensez pouvoir “simplifier” la procédure.\nVous adaptez le protocole à votre niveau et lancez l’expérience.",
+				"Tout part mal. Au début, rien de spectaculaire. Puis votre ami commence à changer : il parle moins, réagit bizarrement...",
+				"Son comportement devient inquiétant. Il n’est pas encore un monstre. Mais clairement, quelque chose ne va pas.",
+				"Vous comprenez alors que le journal disait vrai.\nL'antidote n’était pas juste une mauvaise blague.\n\nIl est temps de sauver votre ami... et votre propre vie." };
+
+		// Boucle pour afficher chaque image avec son texte correspondant
+		for (int i = 0; i < images.length; i++) {
+			gui.afficheImage(images[i]);
+			javax.swing.JOptionPane.showMessageDialog(null, textes[i], "Prologue",
+					javax.swing.JOptionPane.INFORMATION_MESSAGE);
+		}
 	}
 }
