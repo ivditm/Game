@@ -703,7 +703,11 @@ public class Jeu {
 		if (!zoneCourante.getInteractables().isEmpty()) {
 			Interactable obj = zoneCourante.getInteractables().get(0);
 			if (obj instanceof Coffre coffre && coffre.estOuvert()) {
-				imageAafficher = imageAafficher.replace(".png", "_open.png");
+				if (zoneCourante.getNom().contains("Salle Informatique")) {
+					imageAafficher = "salleinfo_batiment_a_protocole.png";
+				} else {
+					imageAafficher = imageAafficher.replace(".png", "_open.png");
+				}
 			} else if (obj instanceof Ordinateur ordi && ordi.estOuvert()) {
 				imageAafficher = "salleinfo_batiment_a_protocole.png";
 			}
