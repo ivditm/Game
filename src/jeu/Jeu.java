@@ -185,11 +185,11 @@ public class Jeu {
 		couloirC.ajouteSortie(Direction.EST, cafeteriaProfs);
 		cafeteriaProfs.ajouteSortie(Direction.OUEST, couloirC);
 
-		cafeteriaProfs.ajouteSortie(Direction.SUD_OUEST, toilettesC1);
-		toilettesC1.ajouteSortie(Direction.NORD_EST, cafeteriaProfs);
+		cafeteriaProfs.ajouteSortie(Direction.NORD, toilettesC1);
+		toilettesC1.ajouteSortie(Direction.EST, cafeteriaProfs);
 
-		cafeteriaProfs.ajouteSortie(Direction.NORD, salleReunion);
-		salleReunion.ajouteSortie(Direction.SUD, cafeteriaProfs);
+		couloirC.ajouteSortie(Direction.OUEST, salleReunion);
+		salleReunion.ajouteSortie(Direction.EST, couloirC);
 
 		salleReunion.ajouteSortie(Direction.EST, toilettesC2);
 		toilettesC2.ajouteSortie(Direction.OUEST, salleReunion);
