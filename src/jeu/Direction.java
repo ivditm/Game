@@ -31,7 +31,8 @@ public enum Direction implements Commande {
 
 	NORD_OUEST("NO", "NO (aller au NORD OUEST)"),
 
-	NORD_EST("NE", "NE (aller au NORD EST");
+	NORD_EST("NE", "NE (aller au NORD EST"), SUD_OUEST("SO", "SO (aller au SUD OUEST)"),
+	SUD_EST("SE", "SE (aller au SUD EST");
 
 	/** Abréviation de la direction */
 	private final String abreviation;
