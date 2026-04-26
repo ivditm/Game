@@ -675,7 +675,6 @@ public class Jeu {
 	 * Vérifie les conditions de victoire ou de défaite après chaque action.
 	 */
 	private boolean actualiserStatut() {
-		// 1. Проверка по времени
 		if (chronometre.estTempsEcoule()) {
 			jouerFinDefaite("Le temps est écoulé... Le virus s'est propagé.");
 			terminer();
