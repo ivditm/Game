@@ -2,7 +2,9 @@ package jeu;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import danger.GestionRencontres;
 import danger.Monstre;
@@ -10,7 +12,11 @@ import interactions.Coffre;
 import interactions.Enigme;
 import interactions.Interactable;
 import interactions.Ordinateur;
+import persistance.CompteManager;
+import persistance.EtatPartie;
+import persistance.SaveManager;
 import play.Ingredient;
+import play.Joueur;
 import play.Personnage;
 import play.Recette;
 import win.EtatJeu;
@@ -62,18 +68,51 @@ public class Jeu {
 	/** Arbitre qui vérifie les conditions de victoire/défaite */
 	private FinDePartie arbitre;
 
-	/**
-	 * Construit un nouveau jeu.
-	 * <p>
-	 * Les zones sont créées et reliées entre elles, mais l'interface graphique
-	 * n'est pas encore initialisée. Utiliser {@link #setGUI(GUI)} pour associer une
-	 * interface.
-	 */
+	/** Compte du joueur connecté (stats, pseudo). */
+	private Joueur compteJoueur;
+
+	/** Gestionnaire de sauvegarde de partie. */
+	private SaveManager saveManager;
+
+	/** Gestionnaire de comptes joueurs. */
+	private CompteManager compteManager;
+
+	/** Références aux ingrédients par rang pour restauration. */
+	private Map<Integer, Ingredient> ingredientsParRang;
+
+	/** Références aux coffres dans l'ordre des rangs pour restauration. */
+	private List<Coffre> coffresIngredients;
+
+	/** Recette de l'antidote, pour restauration si déjà obtenue. */
+	private Recette recetteAntidote;
+
+	/** Ordinateur central, pour le marquer ouvert si déjà visité. */
+	private Ordinateur ordinateurCentral;
+
+	/** True si la partie est une reprise de sauvegarde (pas d'intro). */
+	private boolean estUneReprise;
+
+	/** Nouvelle partie sans compte (utilisé pour les tests). */
 	public Jeu() {
-		this.chronometre = new TimeManagement(15); // 15 minutes pour sauver le monde
+		this(new Joueur("Invité"));
+	}
+
+	/** Nouvelle partie pour un joueur connecté. */
+	public Jeu(Joueur joueur) {
+		this.compteJoueur = joueur;
+		this.saveManager = new SaveManager();
+		this.compteManager = new CompteManager();
+		this.chronometre = new TimeManagement(15);
 		this.arbitre = new FinDePartie();
 		creerCarte();
 		gui = null;
+	}
+
+	/** Reprise d'une partie sauvegardée. */
+	public Jeu(Joueur joueur, EtatPartie etat) {
+		this(joueur);
+		restaurerEtat(etat);
+		this.estUneReprise = true;
 	}
 
 	/**
@@ -83,7 +122,7 @@ public class Jeu {
 	 */
 	public void setGUI(GUI g) {
 		gui = g;
-		jouerIntroduction();
+		if (!estUneReprise) jouerIntroduction();
 		afficherMessageDeBienvenue();
 	}
 
@@ -243,6 +282,22 @@ public class Jeu {
 				recetteAntidote, poolEnigmes.remove(0));
 		salleInfoA.ajouterInteractable(ordi);
 
+		// Références gardées pour restaurer une sauvegarde
+		this.ingredientsParRang = new HashMap<>();
+		this.ingredientsParRang.put(1, ing1);
+		this.ingredientsParRang.put(2, ing2);
+		this.ingredientsParRang.put(3, ing3);
+		this.ingredientsParRang.put(4, ing4);
+		this.ingredientsParRang.put(5, ing5);
+		this.coffresIngredients = new ArrayList<>();
+		this.coffresIngredients.add(coffre1);
+		this.coffresIngredients.add(coffre2);
+		this.coffresIngredients.add(coffre3);
+		this.coffresIngredients.add(coffre4);
+		this.coffresIngredients.add(coffre5);
+		this.recetteAntidote = recetteAntidote;
+		this.ordinateurCentral = ordi;
+
 		// ==========================================
 		// INITIALISATION DU DÉPART
 		// ==========================================
@@ -380,6 +435,7 @@ public class Jeu {
 
 		case "I", "INTERAGIR" -> interagir();
 		case "INV", "INVENTAIRE" -> afficherInventaire();
+		case "SAV", "SAUVEGARDER" -> sauvegarder();
 		case "Q", "QUITTER" -> terminer();
 		case "R", "RETOUR" -> this.revenir();
 		default -> gui.afficher("Commande inconnue");
@@ -688,6 +744,7 @@ public class Jeu {
 	 */
 	private boolean actualiserStatut() {
 		if (chronometre.estTempsEcoule()) {
+			enregistrerFin(false);
 			jouerFinDefaite("Le temps est écoulé... Le virus s'est propagé.");
 			terminer();
 			return false;
@@ -695,10 +752,12 @@ public class Jeu {
 		EtatJeu etat = arbitre.verifierEtat(joueur.getInventaire(), gestionRencontres.getNbRencontres());
 
 		if (etat == EtatJeu.VICTOIRE) {
+			enregistrerFin(true);
 			jouerFinVictoire();
 			terminer();
 			return false;
 		} else if (etat == EtatJeu.DEFAITE) {
+			enregistrerFin(false);
 			jouerFinDefaite("Le monstre vous a tué 3 fois...");
 			terminer();
 			return false;
@@ -781,5 +840,61 @@ public class Jeu {
 			javax.swing.JOptionPane.showMessageDialog(null, textes[i], "GAME OVER",
 					javax.swing.JOptionPane.ERROR_MESSAGE);
 		}
+	}
+
+	/** Sauvegarde l'état courant de la partie sur disque. */
+	private void sauvegarder() {
+		verifieGUI();
+		boolean recetteObtenue = joueur.getInventaire().getObjets().stream()
+				.anyMatch(o -> o instanceof Recette);
+		EtatPartie etat = new EtatPartie(
+				zoneCourante.getNom(),
+				joueur.getInventaire().getProchainRangAttendu(),
+				recetteObtenue,
+				gestionRencontres.getNbRencontres(),
+				chronometre.getTempsRestantMs());
+		if (saveManager.sauvegarderPartie(compteJoueur.getPseudo(), etat)) {
+			gui.afficher("Partie sauvegardée.");
+		} else {
+			gui.afficher("Erreur lors de la sauvegarde.");
+		}
+	}
+
+	/**
+	 * Restaure l'état d'une partie sauvegardée dans le jeu en cours.
+	 * Appelé uniquement depuis le constructeur {@link #Jeu(Joueur, EtatPartie)}.
+	 */
+	private void restaurerEtat(EtatPartie etat) {
+		// Trouver la zone par son nom
+		Zone zoneRestauree = toutesLesZones.stream()
+				.filter(z -> z.getNom().equals(etat.nomZone))
+				.findFirst()
+				.orElse(toutesLesZones.get(0));
+		zoneCourante = zonePrecedente = zoneRestauree;
+		joueur.setZoneCourante(zoneRestauree);
+
+		// Restaurer les ingrédients déjà collectés et marquer leurs coffres ouverts
+		for (int i = 1; i < etat.prochainRangAttendu; i++) {
+			joueur.getInventaire().ajouterIngredient(ingredientsParRang.get(i));
+			coffresIngredients.get(i - 1).setOuvert(true);
+		}
+
+		// Restaurer la recette si elle avait été obtenue
+		if (etat.recetteObtenue) {
+			joueur.getInventaire().ajouterObjetDivers(recetteAntidote);
+			ordinateurCentral.setOuvert(true);
+		}
+
+		// Restaurer le compteur de rencontres et le timer
+		gestionRencontres.setNbRencontres(etat.nbRencontres);
+		chronometre.restaurer(etat.tempsRestantMs);
+	}
+
+	/** Met à jour les stats du compte et supprime la sauvegarde en fin de partie. */
+	private void enregistrerFin(boolean victoire) {
+		if (victoire) compteJoueur.ajouterVictoire();
+		else compteJoueur.ajouterDefaite();
+		compteManager.sauvegarderCompte(compteJoueur);
+		saveManager.supprimerSauvegarde(compteJoueur.getPseudo());
 	}
 }

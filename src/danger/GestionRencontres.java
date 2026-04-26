@@ -55,4 +55,9 @@ public class GestionRencontres implements Serializable {
     public Monstre getMonstre() {
         return monstre;
     }
+
+    /** Restaure le compteur de rencontres lors du chargement d'une partie. */
+    public void setNbRencontres(int nbRencontres) {
+        this.nbRencontres = nbRencontres;
+    }
 }

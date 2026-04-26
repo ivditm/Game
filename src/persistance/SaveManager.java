@@ -1,95 +1,88 @@
 package persistance;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-/**
- * Gère l'arborescence des dossiers par Joueur et la sauvegarde de la partie.
- */
-public class SaveManager implements Serializable {
+/** Gère la sauvegarde et le chargement de l'état d'une partie en cours (fichier JSON). */
+public class SaveManager {
 
-	private static final long serialVersionUID = 1L;
+    private static final String DOSSIER_RACINE = "sauvegardes";
+    private static final String FICHIER_PARTIE = "partie.json";
 
-	private static final String DOSSIER_RACINE = "sauvegardes";
-	private static final String FICHIER_PARTIE = "partie.ser";
+    /** Sauvegarde l'état de la partie dans un fichier JSON. @return true si réussi. */
+    public boolean sauvegarderPartie(String pseudo, EtatPartie etat) {
+        getDossierJoueur(pseudo).mkdirs();
+        File fichier = new File(getDossierJoueur(pseudo), FICHIER_PARTIE);
+        String json = "{\n"
+                + "  \"nomZone\": \"" + etat.nomZone + "\",\n"
+                + "  \"prochainRangAttendu\": " + etat.prochainRangAttendu + ",\n"
+                + "  \"recetteObtenue\": " + etat.recetteObtenue + ",\n"
+                + "  \"nbRencontres\": " + etat.nbRencontres + ",\n"
+                + "  \"tempsRestantMs\": " + etat.tempsRestantMs + "\n"
+                + "}";
+        try {
+            Files.writeString(fichier.toPath(), json, StandardCharsets.UTF_8);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-	/**
-	 * Crée le dossier du joueur s'il n'existe pas.
-	 */
-	public void creerCompte(String nomJoueur) {
-		File dossier = getDossierJoueur(nomJoueur);
-		if (!dossier.exists()) {
-			dossier.mkdirs();
-		}
-	}
+    /** Charge l'état sauvegardé depuis le JSON. @return l'état ou null si aucune sauvegarde. */
+    public EtatPartie chargerPartie(String pseudo) {
+        File fichier = new File(getDossierJoueur(pseudo), FICHIER_PARTIE);
+        if (!fichier.exists()) return null;
+        try {
+            String json = Files.readString(fichier.toPath(), StandardCharsets.UTF_8);
+            return new EtatPartie(
+                    getString(json, "nomZone"),
+                    getInt(json, "prochainRangAttendu"),
+                    getBoolean(json, "recetteObtenue"),
+                    getInt(json, "nbRencontres"),
+                    getLong(json, "tempsRestantMs"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-	/**
-	 * Retourne la liste de tous les joueurs existants.
-	 */
-	public List<String> listerJoueurs() {
-		List<String> joueurs = new ArrayList<>();
-		File racine = new File(DOSSIER_RACINE);
-		if (racine.exists() && racine.isDirectory()) {
-			for (File f : racine.listFiles()) {
-				if (f.isDirectory()) {
-					joueurs.add(f.getName());
-				}
-			}
-		}
-		return joueurs;
-	}
+    /** Supprime la sauvegarde du joueur (ex : après une fin de partie). */
+    public void supprimerSauvegarde(String pseudo) {
+        File fichier = new File(getDossierJoueur(pseudo), FICHIER_PARTIE);
+        if (fichier.exists()) fichier.delete();
+    }
 
-	/**
-	 * Sauvegarde un tableau d'objets représentant l'état du jeu. * @return true si
-	 * la sauvegarde a réussi
-	 */
-	public boolean sauvegarderPartie(String nomJoueur, Object[] etatDuJeu) {
-		creerCompte(nomJoueur); // S'assure que le dossier existe
-		File fichier = new File(getDossierJoueur(nomJoueur), FICHIER_PARTIE);
-		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fichier))) {
-			oos.writeObject(etatDuJeu);
-			return true;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
+    /** Retourne true si une sauvegarde de partie existe pour ce pseudo. */
+    public boolean partieSauvegardeeExiste(String pseudo) {
+        return new File(getDossierJoueur(pseudo), FICHIER_PARTIE).exists();
+    }
 
-	/**
-	 * Charge et retourne l'état du jeu. * @return Un tableau d'objets ou null si
-	 * aucune sauvegarde.
-	 */
-	public Object[] chargerPartie(String nomJoueur) {
-		File fichier = new File(getDossierJoueur(nomJoueur), FICHIER_PARTIE);
-		if (!fichier.exists()) {
-			return null;
-		}
-		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fichier))) {
-			return (Object[]) ois.readObject();
-		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+    private File getDossierJoueur(String pseudo) {
+        return new File(DOSSIER_RACINE + File.separator + pseudo);
+    }
 
-	/**
-	 * Supprime la sauvegarde du joueur (ex: après une fin de partie).
-	 */
-	public void supprimerSauvegarde(String nomJoueur) {
-		File fichier = new File(getDossierJoueur(nomJoueur), FICHIER_PARTIE);
-		if (fichier.exists()) {
-			fichier.delete();
-		}
-	}
+    private static String getString(String json, String key) {
+        Matcher m = Pattern.compile("\"" + key + "\"\\s*:\\s*\"([^\"]+)\"").matcher(json);
+        return m.find() ? m.group(1) : "";
+    }
 
-	private File getDossierJoueur(String nomJoueur) {
-		return new File(DOSSIER_RACINE + File.separator + nomJoueur);
-	}
+    private static int getInt(String json, String key) {
+        Matcher m = Pattern.compile("\"" + key + "\"\\s*:\\s*(-?\\d+)").matcher(json);
+        return m.find() ? Integer.parseInt(m.group(1)) : 0;
+    }
+
+    private static long getLong(String json, String key) {
+        Matcher m = Pattern.compile("\"" + key + "\"\\s*:\\s*(-?\\d+)").matcher(json);
+        return m.find() ? Long.parseLong(m.group(1)) : 0L;
+    }
+
+    private static boolean getBoolean(String json, String key) {
+        Matcher m = Pattern.compile("\"" + key + "\"\\s*:\\s*(true|false)").matcher(json);
+        return m.find() && Boolean.parseBoolean(m.group(1));
+    }
 }
