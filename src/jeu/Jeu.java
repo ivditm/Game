@@ -675,30 +675,25 @@ public class Jeu {
 	 * Vérifie les conditions de victoire ou de défaite après chaque action.
 	 */
 	private boolean actualiserStatut() {
+		// 1. Проверка по времени
 		if (chronometre.estTempsEcoule()) {
-			gui.afficher("Le temps est écoulé... Le virus s'est propagé. GAME OVER.");
+			jouerFinDefaite("Le temps est écoulé... Le virus s'est propagé.");
 			terminer();
 			return false;
 		}
-
 		EtatJeu etat = arbitre.verifierEtat(joueur.getInventaire(), gestionRencontres.getNbRencontres());
 
 		if (etat == EtatJeu.VICTOIRE) {
-			gui.afficher("=======================================");
-			gui.afficher("FÉLICITATIONS ! Vous avez synthétisé l'antidote !");
-			gui.afficher("Le monde est sauvé.");
-			gui.afficher("=======================================");
+			jouerFinVictoire();
 			terminer();
 			return false;
 		} else if (etat == EtatJeu.DEFAITE) {
-			gui.afficher("=======================================");
-			gui.afficher("GAME OVER ! Le monstre vous a tué 3 fois...");
-			gui.afficher("=======================================");
+			jouerFinDefaite("Le monstre vous a tué 3 fois...");
 			terminer();
 			return false;
 		}
 
-		return true; // Игра продолжается
+		return true;
 	}
 
 	/**
@@ -743,6 +738,38 @@ public class Jeu {
 			gui.afficheImage(images[i]);
 			javax.swing.JOptionPane.showMessageDialog(null, textes[i], "Prologue",
 					javax.swing.JOptionPane.INFORMATION_MESSAGE);
+		}
+	}
+
+	/**
+	 * cine pour win
+	 */
+	private void jouerFinVictoire() {
+		String[] images = { "victoire.png", "jettepotion.png", "missionmessagepositif.png" };
+		String[] textes = {
+				"FÉLICITATIONS ! L'antidote est prêt ! Vous avez réussi à stabiliser la formule juste à temps.",
+				"Sans hésiter, vous administrez l'antidote à votre ami. Le processus de transformation s'arrête, et son regard redevient humain.",
+				"Mission accomplie. Le protocole secret est neutralisé et votre ami est sauvé. Vous pouvez enfin quitter ce cauchemar... pour cette fois." };
+
+		for (int i = 0; i < images.length; i++) {
+			gui.afficheImage(images[i]);
+			javax.swing.JOptionPane.showMessageDialog(null, textes[i], "VICTOIRE",
+					javax.swing.JOptionPane.INFORMATION_MESSAGE);
+		}
+	}
+
+	/**
+	 * cine pour defaite
+	 */
+	private void jouerFinDefaite(String messageRaison) {
+		String[] images = { "defaite.png", "missionmessagenegatif.png" };
+		String[] textes = { "C'est la fin... " + messageRaison,
+				"L'expérience a définitivement échoué. Le bâtiment est placé en quarantaine totale. Il n'y a plus aucun espoir pour vous." };
+
+		for (int i = 0; i < images.length; i++) {
+			gui.afficheImage(images[i]);
+			javax.swing.JOptionPane.showMessageDialog(null, textes[i], "GAME OVER",
+					javax.swing.JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }
