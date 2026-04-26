@@ -460,6 +460,9 @@ public class Jeu {
 
 				return;
 			}
+			gui.afficher(zoneCourante.descriptionLongue());
+			gui.afficher();
+			actualiserImagePiece();
 		}
 	}
 
@@ -695,19 +698,14 @@ public class Jeu {
 		return true;
 	}
 
-	/**
-	 * Определяет, какую картинку комнаты показать (закрытую или открытую)
-	 */
 	private void actualiserImagePiece() {
 		String imageAafficher = zoneCourante.nomImage();
 		if (!zoneCourante.getInteractables().isEmpty()) {
 			Interactable obj = zoneCourante.getInteractables().get(0);
 			if (obj instanceof Coffre coffre && coffre.estOuvert()) {
-				if (zoneCourante.getNom().contains("Salle Informatique")) {
-					imageAafficher = "salleinfo_batiment_a_protocole.png";
-				} else {
-					imageAafficher = imageAafficher.replace(".png", "_open.png");
-				}
+				imageAafficher = imageAafficher.replace(".png", "_open.png");
+			} else if (obj instanceof Ordinateur ordi && ordi.estOuvert()) {
+				imageAafficher = "salleinfo_batiment_a_protocole.png";
 			}
 		}
 		gui.afficheImage(imageAafficher);
