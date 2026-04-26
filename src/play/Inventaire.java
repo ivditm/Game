@@ -90,6 +90,11 @@ public class Inventaire implements Serializable {
 		return prochainRangAttendu > 5;
 	}
 
+	/** Retourne le rang du prochain ingrédient attendu (utile pour la sauvegarde). */
+	public int getProchainRangAttendu() {
+		return prochainRangAttendu;
+	}
+
 	/**
 	 * Récupère la liste brute des objets de l'inventaire. * @return Une
 	 * {@link List} contenant tous les objets possédés.

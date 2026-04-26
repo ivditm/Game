@@ -63,4 +63,19 @@ public class TimeManagement implements Serializable {
 
 		return String.format("%02d:%02d", minutes, secondes);
 	}
+
+	/**
+	 * Restaure le chronomètre à partir d'un temps restant sauvegardé.
+	 *
+	 * @param tempsRestantMs temps restant en millisecondes
+	 */
+	public void restaurer(long tempsRestantMs) {
+		this.startTime = System.currentTimeMillis() - (this.intervalleAutorise - tempsRestantMs);
+	}
+
+	/** Retourne le temps restant en millisecondes. */
+	public long getTempsRestantMs() {
+		long tempsEcoule = System.currentTimeMillis() - this.startTime;
+		return Math.max(0, this.intervalleAutorise - tempsEcoule);
+	}
 }

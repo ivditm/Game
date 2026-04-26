@@ -30,7 +30,10 @@ public enum CommandeNonDirectionnelle implements Commande {
 	INTERAGIR("I", "I (interagir)"),
 
 	/** Commande pour afficher le contenu de l'inventaire et le chronomètre */
-	INVENTAIRE("INV", "INV (inventaire)");
+	INVENTAIRE("INV", "INV (inventaire)"),
+
+	/** Commande pour sauvegarder la partie en cours */
+	SAUVEGARDER("SAV", "SAV (sauvegarder)");
 
 	/** Abréviation de la commande */
 	private final String abreviation;

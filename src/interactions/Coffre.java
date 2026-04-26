@@ -38,6 +38,11 @@ public class Coffre implements Interactable {
 		return ouvert;
 	}
 
+	/** Marque le coffre comme ouvert (utilisé lors du chargement d'une partie). */
+	public void setOuvert(boolean ouvert) {
+		this.ouvert = ouvert;
+	}
+
 	@Override
 	public String examiner() {
 		if (ouvert) {
