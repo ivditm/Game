@@ -116,8 +116,7 @@ public class Jeu {
 		Zone cafeteria = new Zone("Cafétéria (Bat B)", "Des tables renversées.", "cafetaria_batiment_b.png");
 		Zone cuisine = new Zone("Cuisine", "Les frigos sont ouverts et vides.", "cuisine_batiment_b.png");
 		Zone couloirB = new Zone("Couloir (B)", "Un long couloir vitré.", "couloirbu_batiment_c.png");
-		Zone buPrincipale = new Zone("Bibliothèque Universitaire", "Des rangées de livres poussiéreux.",
-				"universite.png");
+		Zone buPrincipale = new Zone("Bibliothèque Universitaire", "Des rangées de livres poussiéreux.", "BU_B.png");
 		Zone salleInfoB = new Zone("Salle Informatique (BU)", "Des PC alignés.", "salleinfo_batiment_b.png");
 		Zone salleEtude = new Zone("Salle d'Étude", "Un silence pesant.", "salledetude_batiment_b.png");
 		Zone toilettesBU = new Zone("Toilettes (BU)", "Des lavabos brisés.", "toilettes_batiment_b.png");
@@ -385,8 +384,6 @@ public class Jeu {
 		case "R", "RETOUR" -> this.revenir();
 		default -> gui.afficher("Commande inconnue");
 		}
-
-		// Проверяем статус игры. Если игра не окончена, выводим HUD (жизни и время)
 		if (actualiserStatut()) {
 			int viesRestantes = 3 - gestionRencontres.getNbRencontres();
 			gui.afficher("---------------------------------------------------");
@@ -624,7 +621,9 @@ public class Jeu {
 			gui.afficher("Il n'y a rien avec quoi interagir ici.");
 			return;
 		}
+
 		Interactable objet = objets.get(0);
+
 		if (objet instanceof interactions.Ordinateur ordi) {
 			if (!ordi.estOuvert() && ordi.getEnigme() != null && !ordi.getEnigme().estResolue()) {
 				String reponse = javax.swing.JOptionPane.showInputDialog(null,
@@ -640,6 +639,16 @@ public class Jeu {
 				}
 			} else {
 				gui.afficher(ordi.interagir(joueur.getInventaire()));
+			}
+		} else if (objet instanceof Coffre coffre) {
+			if (!joueur.getInventaire().toString().contains("Protocole Antidote")) {
+				gui.afficher(
+						"Vous voyez des éléments chimiques à l'intérieur, mais il est trop dangereux de les manipuler sans connaître la formule exacte.");
+				gui.afficher("Trouvez d'abord le Protocole Antidote !");
+			} else {
+				String resultat = coffre.interagir(joueur.getInventaire());
+				gui.afficher(resultat);
+				actualiserImagePiece();
 			}
 		} else {
 			String resultat = objet.interagir(joueur.getInventaire());
